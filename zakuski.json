@@ -1,0 +1,12 @@
+{
+    "zakuski": [
+        {"id": 1, "name": "Картофель фри", "price": 180},
+        {"id": 2, "name": "Наггетсы", "price": 255, "kolichestvo": 5},
+        {"id": 3, "name": "Стрипсы", "price": 265, "kolichestvo": 5},
+        {"id": 4, "name": "Сырные палочки", "price": 285, "kolichestvo": 6},
+        {"id": 5, "name": "Сырный соус", "price": 50, "category": "соус"},
+        {"id": 6, "name": "Чесночный соус", "price": 50, "category": "соус"},
+        {"id": 7, "name": "Соус барбекю", "price": 50, "category": "соус"},
+        {"id": 8, "name": "Грибной соус", "price": 50, "category": "соус"}
+    ]
+}
