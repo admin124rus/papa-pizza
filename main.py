@@ -7,9 +7,10 @@ import config
 import html
 from datetime import datetime
 
-# ================= НАСТРОЙКИ =================
+
 # ================= ВЛАДЕЛЕЦ =================
-OWNER_ID = 7862970987
+OWNER_ID = 6635821466
+# ================= НАСТРОЙКИ =================
 tz = pytz.timezone('Asia/Krasnoyarsk')
 bot = telebot.TeleBot(config.TOKEN)
 
@@ -433,7 +434,7 @@ def show_archive_orders_admin(chat_id):
                     callback_data=f'admin_order_{oid}'
                 )
             )
-
+    kb.add(types.InlineKeyboardButton('🗑 Удалить', callback_data='archive_delete'))
     kb.add(types.InlineKeyboardButton('🔍 Поиск', callback_data='archive_search'))
     kb.add(types.InlineKeyboardButton('◀️ Назад', callback_data='back_main'))
 
@@ -443,6 +444,91 @@ def show_archive_orders_admin(chat_id):
         parse_mode='HTML',
         reply_markup=kb
     )
+
+def archive_delete_menu(chat_id):
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    kb.add(
+        types.InlineKeyboardButton('🗓 Удалить месяц целиком', callback_data='archive_delete_month'),
+        types.InlineKeyboardButton('📦 Удалить заказ по номеру', callback_data='archive_delete_order'),
+        types.InlineKeyboardButton('◀️ Назад', callback_data='admin_archive')
+    )
+
+    bot.send_message(
+        chat_id,
+        '🗑 <b>Удаление архива</b>\nВыберите действие:',
+        parse_mode='HTML',
+        reply_markup=kb
+    )
+
+def archive_delete_month_menu(chat_id):
+    cursor.execute('''
+        SELECT DISTINCT substr(created_at, 7, 4) || '-' || substr(created_at, 4, 2)
+        FROM orders
+        WHERE is_archived = 1
+        ORDER BY 1 DESC
+    ''')
+    months = cursor.fetchall()
+
+    if not months:
+        bot.send_message(chat_id, '📦 Архив пуст')
+        return
+
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    for (month_key,) in months:
+        year, month = month_key.split('-')
+        title = f'{MONTHS_RU[int(month)]} {year}'
+        kb.add(types.InlineKeyboardButton(
+            f'🗓 {title}',
+            callback_data=f'archive_delete_month_{month_key}'
+        ))
+
+    kb.add(types.InlineKeyboardButton('◀️ Назад', callback_data='archive_delete'))
+
+    bot.send_message(
+        chat_id,
+        '🗓 <b>Выберите месяц для удаления:</b>',
+        parse_mode='HTML',
+        reply_markup=kb
+    )
+def delete_archive_month(chat_id, month_key):
+    year, month = month_key.split('-')
+
+    cursor.execute('''
+        DELETE FROM orders
+        WHERE is_archived = 1
+        AND substr(created_at, 7, 4) = ?
+        AND substr(created_at, 4, 2) = ?
+    ''', (year, month))
+    conn.commit()
+
+    bot.send_message(
+        chat_id,
+        f'🗑 Архив за {MONTHS_RU[int(month)]} {year} удалён'
+    )
+
+    show_archive_orders_admin(chat_id)
+
+def ask_delete_order_id(message):
+    chat_id = message.chat.id
+    try:
+        order_id = int(message.text)
+
+        cursor.execute(
+            'DELETE FROM orders WHERE id = ? AND is_archived = 1',
+            (order_id,)
+        )
+
+        if cursor.rowcount == 0:
+            bot.send_message(chat_id, '❌ Заказ не найден в архиве')
+        else:
+            conn.commit()
+            bot.send_message(chat_id, f'🗑 Заказ №{order_id} удалён')
+
+        show_archive_orders_admin(chat_id)
+
+    except ValueError:
+        bot.send_message(chat_id, '❌ Введите корректный номер заказа')
+
 
 def show_order_detail_admin(chat_id, order_id):
     """Показать детали заказа администратору"""
@@ -454,20 +540,59 @@ def show_order_detail_admin(chat_id, order_id):
         bot.send_message(chat_id, '❌ Заказ не найден')
         return
 
-    cursor.execute('SELECT is_archived FROM orders WHERE id = ?', (order_id,))
-    is_archived = cursor.fetchone()[0]
+    # Получаем данные заказа
+    cursor.execute(
+        'SELECT is_archived, user_id FROM orders WHERE id = ?',
+        (order_id,)
+    )
+    row = cursor.fetchone()
+    if not row:
+        bot.send_message(chat_id, '❌ Заказ не найден')
+        return
+
+    is_archived, user_id = row
 
     kb = types.InlineKeyboardMarkup()
 
+    # 🔗 КНОПКА ОТКРЫТИЯ ПРОФИЛЯ КЛИЕНТА
+    if user_id:
+        try:
+            chat = bot.get_chat(user_id)
+            if chat.username:
+                kb.add(
+                    types.InlineKeyboardButton(
+                        '🔗 Открыть профиль',
+                        url=f'https://t.me/{chat.username}'
+                    )
+                )
+            else:
+                kb.add(
+                    types.InlineKeyboardButton(
+                        '🔗 Открыть профиль',
+                        url=f'tg://user?id={user_id}'
+                    )
+                )
+        except Exception as e:
+            print(f'Ошибка получения профиля пользователя {user_id}: {e}')
+
     # 👉 Кнопки статусов только для активных заказов
     if not is_archived:
-        kb = operator_status_keyboard(order_id)
+        status_kb = operator_status_keyboard(order_id)
+
+        # переносим кнопки статусов в основную клавиатуру
+        for row in status_kb.keyboard:
+            kb.row(*row)
+
         kb.add(types.InlineKeyboardButton('◀️ Назад', callback_data='admin_orders'))
     else:
         kb.add(types.InlineKeyboardButton('◀️ Назад', callback_data='admin_archive'))
 
-    bot.send_message(chat_id, text, parse_mode='HTML', reply_markup=kb)
-
+    bot.send_message(
+        chat_id,
+        text,
+        parse_mode='HTML',
+        reply_markup=kb
+    )
 
 def operator_status_keyboard(order_id):
     """Клавиатура изменения статуса заказа для оператора"""
@@ -489,6 +614,23 @@ def operator_status_keyboard(order_id):
 
 
 # ================= ВСПОМОГАТЕЛЬНОЕ =================
+def send_item_with_image(chat_id, image, text, kb=None):
+    if image:
+        bot.send_photo(
+            chat_id,
+            photo=image,
+            caption=text,
+            parse_mode='HTML',
+            reply_markup=kb
+        )
+    else:
+        bot.send_message(
+            chat_id,
+            text,
+            parse_mode='HTML',
+            reply_markup=kb
+        )
+
 def get_cart_total(chat_id):
     return sum(
         i['item']['price'] * i['quantity']
@@ -538,12 +680,16 @@ def build_admin_order_text(order_id):
 
     # ===== TELEGRAM =====
     tg_line = ''
+    tg_username = None
     try:
         chat = bot.get_chat(user_id)
         if chat.username:
-            tg_line = f'💬 <b>Telegram:</b> @{chat.username}\n'
+            tg_username = chat.username
+            tg_line += f'💬 <b>Telegram:</b> @{chat.username}\n'
+        tg_line += f'🆔 <b>ID пользователя:</b> <code>{user_id}</code>\n'
     except:
-        pass
+        tg_line += f'🆔 <b>ID пользователя:</b> <code>{user_id}</code>\n'
+
 
     # ===== ДОСТАВКА =====
     if delivery_type == 'Самовывоз':
@@ -898,7 +1044,6 @@ def pizza_menu(chat_id):
         parse_mode='HTML',
         reply_markup=kb
     )
-
 def pizza_single_menu(chat_id):
     kb = types.InlineKeyboardMarkup()
 
@@ -939,7 +1084,6 @@ def pizza_combo_menu(chat_id):
         parse_mode='HTML',
         reply_markup=kb
     )
-
 def pizza_details(chat_id, pid):
     p = next(x for x in pizzas if x['id'] == pid)
 
@@ -962,8 +1106,12 @@ def pizza_details(chat_id, pid):
 
     add_card_navigation(kb, 'pizza_single')
 
-    bot.send_message(chat_id, text, parse_mode='HTML', reply_markup=kb)
-
+    send_item_with_image(
+        chat_id,
+        p.get('image'),
+        text,
+        kb
+    )
 
 def combo_details(chat_id, cid):
     c = next(x for x in combos if x['id'] == cid)
@@ -1498,7 +1646,9 @@ def callbacks(c):
     elif d == 'about_us':
         text = (
             '🍕 <b>PAPA PIZZA</b>\n\n'
-            'Если хочешь подкрепиться — позвони нам ☎️\n\n'
+            'Если хочешь подкрепиться — позвони нам ☎️\n'
+            '🔵 Мы в ВКонтакте:\n'
+            'https://vk.com/pizzakansk\n\n'
             '🕙 <b>Время работы:</b>\n'
             'с 10:00 до 22:00\n\n'
             '🚚 <b>Доставка:</b>\n'
@@ -1510,10 +1660,12 @@ def callbacks(c):
             '40 лет Октября, 1/6, Канск'
         )
 
-        kb = types.InlineKeyboardMarkup(row_width=1)
+        kb = types.InlineKeyboardMarkup(row_width=2)
 
+        # Кнопки в одном ряду
         kb.add(
-            types.InlineKeyboardButton('📞 Позвонить', callback_data='call_phone')
+            types.InlineKeyboardButton('📞 Позвонить', callback_data='call_phone'),
+
         )
 
         kb.add(
@@ -1534,6 +1686,7 @@ def callbacks(c):
             reply_markup=kb,
             disable_web_page_preview=True
         )
+
     elif d == 'call_phone':
         bot.send_message(
             chat_id,
@@ -1616,6 +1769,24 @@ def callbacks(c):
         archive_month_state[chat_id][month_key] = not current
 
         show_archive_orders_admin(chat_id)
+
+    elif d == 'archive_delete':
+        archive_delete_menu(chat_id)
+
+    elif d == 'archive_delete_month':
+        archive_delete_month_menu(chat_id)
+
+    elif d.startswith('archive_delete_month_'):
+        month_key = d.replace('archive_delete_month_', '')
+        delete_archive_month(chat_id, month_key)
+
+    elif d == 'archive_delete_order':
+        msg = bot.send_message(
+            chat_id,
+            '📦 Введите номер заказа для удаления из архива:'
+        )
+        bot.register_next_step_handler(msg, ask_delete_order_id)
+
 
     # ===== КОРЗИНА =====
     elif d == 'show_cart':
@@ -1934,6 +2105,16 @@ def text_back(message):
 def send_user_id(message):
     chat_id = message.chat.id
     bot.reply_to(message, f"Ваш Telegram ID: `{chat_id}`", parse_mode="Markdown")
+
+@bot.message_handler(content_types=['photo'])
+def handle_photo(message):
+    file_id = message.photo[-1].file_id
+
+    bot.send_message(
+        message.chat.id,
+        f'🆔 <b>file_id изображения:</b>\n<code>{file_id}</code>',
+        parse_mode='HTML'
+    )
 
 # ================= ЗАПУСК =================
 bot.infinity_polling(
