@@ -38,8 +38,8 @@ shaurma_list = shaurma_data['shaurma']
 additives = additives_data['additives']
 
 # ================= БАЗА ДАННЫХ =================
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, 'orders.db')
+DB_PATH = '/data/orders.db'
+os.makedirs('/data', exist_ok=True)
 
 conn = sqlite3.connect(DB_PATH, check_same_thread=False)
 cursor = conn.cursor()
@@ -73,13 +73,6 @@ CREATE TABLE IF NOT EXISTS admins (
 )
 ''')
 
-conn.commit()
-
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS admins (
-    user_id INTEGER PRIMARY KEY
-)
-''')
 conn.commit()
 
 # ================= ПАМЯТЬ =================
