@@ -9,7 +9,7 @@ from datetime import datetime
 
 
 # ================= ВЛАДЕЛЕЦ =================
-OWNER_ID = 6635821466
+OWNER_ID = 7862970987
 # ================= НАСТРОЙКИ =================
 tz = pytz.timezone('Asia/Krasnoyarsk')
 bot = telebot.TeleBot(config.TOKEN)
