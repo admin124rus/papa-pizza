@@ -5,6 +5,7 @@ import sqlite3
 import pytz
 import config
 import html
+import os
 from datetime import datetime
 
 
@@ -37,39 +38,42 @@ shaurma_list = shaurma_data['shaurma']
 additives = additives_data['additives']
 
 # ================= БАЗА ДАННЫХ =================
-conn = sqlite3.connect('orders.db', check_same_thread=False)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'orders.db')
+
+conn = sqlite3.connect(DB_PATH, check_same_thread=False)
 cursor = conn.cursor()
 
-TABLES = {
-    'pizza': 'orders',
-    'combo': 'combo_orders',
-    'zakuska': 'snack_orders',
-    'drink': 'drink_orders',
-    'shaurma': 'shaurma_orders',
-    'additive': 'additive_orders'
-}
+cursor.execute('PRAGMA journal_mode=WAL;')
+cursor.execute('PRAGMA synchronous=NORMAL;')
 
-for table in TABLES.values():
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS orders (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        name TEXT,
-        phone TEXT,
-        delivery_type TEXT,
-        delivery_zone TEXT,
-        address TEXT,
-        delivery_time TEXT,
-        payment_method TEXT,
-        cash_change TEXT,
-        comment TEXT,
-        order_text TEXT,
-        order_status TEXT,
-        created_at TEXT,
-        is_archived INTEGER DEFAULT 0
-    )
-    ''')
-    conn.commit()
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    name TEXT,
+    phone TEXT,
+    delivery_type TEXT,
+    delivery_zone TEXT,
+    address TEXT,
+    delivery_time TEXT,
+    payment_method TEXT,
+    cash_change TEXT,
+    comment TEXT,
+    order_text TEXT,
+    order_status TEXT,
+    created_at TEXT,
+    is_archived INTEGER DEFAULT 0
+)
+''')
+
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS admins (
+    user_id INTEGER PRIMARY KEY
+)
+''')
+
+conn.commit()
 
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS admins (
