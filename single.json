@@ -7,7 +7,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "Лук, охотничьи колбаски, помидор, сыр, оливки.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Охотничья.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Охотничья.jpg"
 
         },
         {
@@ -17,7 +17,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "Ветчина, грибы, помидор, сервелат, сыр.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Нью-йорк.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Нью-йорк.jpg"
         },
          {
             "id": 3,
@@ -26,7 +26,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "Сервелат, болгарский перец, помидор, сыр, сливки.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Пепперони.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Пепперони.jpg"
         },
          {
             "id": 4,
@@ -35,7 +35,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "Ветчина, грибы, помидоры, сыр.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Классическая.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Классическая.jpg"
         },
          {
             "id": 5,
@@ -44,7 +44,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "Бекон, помидоры, острый перец, халапенью, сыр.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Острая.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Острая.jpg"
         },
          {
             "id": 6,
@@ -53,7 +53,7 @@
             "diameter": 33,
             "grams": 850,
             "ingredients": "Лук, охотничьи колбаски, помидор, сыр, оливки.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Космическая.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Космическая.jpg"
         },
         {
             "id": 7,
@@ -62,7 +62,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "Ветчина/курица (на выбор), ананас, сыр.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Гавайская.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Гавайская.jpg"
         },
         {
             "id": 8,
@@ -71,7 +71,7 @@
             "diameter": 33,
             "grams": 850,
             "ingredients": "курица, лук, помидоры, халапенью, сыр, оливки.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Мексикана.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Мексикана.jpg"
         },
       {
             "id": 9,
@@ -80,7 +80,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "лук, бекон/грибы, помидоры, оливки, сыр гауда.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Бекон-барбекю.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Бекон-барбекю.jpg"
         },
       {
             "id": 10,
@@ -89,7 +89,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "Лук, грибы, помидоры, сыр гауда, брокколи.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Грибная.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Грибная.jpg"
         },
       {
             "id": 11,
@@ -98,7 +98,7 @@
             "diameter": 33,
             "grams": 650,
             "ingredients": "Огурчик маринованный, морепродукты, лимон, сыр.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Морская.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Морская.jpg"
         },
       {
             "id": 12,
@@ -107,7 +107,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "огурцы, лук, болгарский перец, оливки, грибы, сыр.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Вегетарианская.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Вегетарианская.jpg"
         },
        {
             "id": 13,
@@ -116,7 +116,7 @@
             "diameter": 33,
             "grams": 800,
             "ingredients": "Лук, помидоры, филе семги, перец, сыр гауда.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Посейдон.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Посейдон.jpg"
         },
       {
             "id": 14,
@@ -125,7 +125,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "Джем, сметана, сахар.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Десертная.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Десертная.jpg"
         },
        {
             "id": 15,
@@ -134,7 +134,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "Лук, ветчина, бекон, болгарский перец, помидоры, сыр.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Мясная.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Мясная.jpg"
         },
       {
             "id": 16,
@@ -143,7 +143,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "Бекон, яйцо, помидоры, сыр.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Английский%20завтрак.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Английский завтрак.jpg"
         },
       {
             "id": 17,
@@ -152,7 +152,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "Лук, ветчина, сервелат, грибы, помидоры, сыр, огурец.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Времена%20года.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Времена года.jpg"
         },
       {
             "id": 18,
@@ -161,7 +161,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "Соус сырный, брынза, сыр копченый, сыр гауда.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Сырная.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Сырная.jpg"
         },
       {
             "id": 19,
@@ -170,7 +170,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "Соус чили/лук, ветчина, охот. колбаски, корнишоны, помидоры, сыр гауда.",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Чилийская.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Чилийская.jpg"
         },
        {
             "id": 20,
@@ -179,7 +179,7 @@
             "diameter": 33,
             "grams": 1000,
             "ingredients": "null",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Трехэтажная.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Трехэтажная.jpg"
         },
       {
             "id": 21,
@@ -197,7 +197,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "Лук, ветчина, сервелат, бекон, болгарский перец, маринованный огурец, помидоры, сыр, оливки",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Мясной%20пир.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Мясной пир.jpg"
         },
       {
             "id": 23,
@@ -206,7 +206,7 @@
             "diameter": 33,
             "grams": 700,
             "ingredients": "Лук, курица, грибы, помидоры, сыр",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Куриная.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Куриная.jpg"
         },
       {
             "id": 24,
@@ -215,7 +215,7 @@
             "diameter": 33,
             "grams": 850,
             "ingredients": "Лук, курица, помидоры, грибы, сыр, оливки",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Сытый%20папа.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Сытый папа.jpg"
         },
       {
             "id": 25,
@@ -224,7 +224,7 @@
             "diameter": 33,
             "grams": 650,
             "ingredients": "помидоры, оливки, сыр",
-            "image": "https://github.com/admin124rus/papa-pizza/blob/main/images/Маргарита.jpg"
+            "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Маргарита.jpg"
         }
     ]
 }
