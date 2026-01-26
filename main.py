@@ -614,11 +614,11 @@ def operator_status_keyboard(order_id):
 
 
 # ================= ВСПОМОГАТЕЛЬНОЕ =================
-def send_item_with_image(chat_id, image, text, kb=None):
-    if image:
+def send_item_with_image(chat_id, image_url, text, kb=None):
+    if image_url:
         bot.send_photo(
             chat_id,
-            photo=image,
+            photo=image_url,
             caption=text,
             parse_mode='HTML',
             reply_markup=kb
@@ -1088,7 +1088,7 @@ def pizza_details(chat_id, pid):
     p = next(x for x in pizzas if x['id'] == pid)
 
     diameter = f'{p["diameter"]} см' if p.get("diameter") else '—'
-    grams = f'{p["grams"]} г' if p.get("grams") and p["grams"] != "null" else '—'
+    grams = f'{p["grams"]} г' if p.get("grams") and p.get("grams") != "null" else '—'
 
     text = (
         f'<b>{p["name"]}</b>\n'
@@ -1108,7 +1108,7 @@ def pizza_details(chat_id, pid):
 
     send_item_with_image(
         chat_id,
-        p.get('image'),
+        p.get('image'),  # Полный URL изображения из JSON
         text,
         kb
     )
