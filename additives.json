@@ -1,0 +1,14 @@
+{
+
+     "additives": [
+        {"id": 1, "name": "Сыр", "grams": 50, "price": 80},
+        {"id": 2, "name": "Ветчина", "grams": 50, "price": 80},
+        {"id": 3, "name": "Курица", "grams": 50, "price": 80},
+        {"id": 4, "name": "Маслины", "kolichestvo": 3, "price": 49},
+        {"id": 5, "name": "Халапенью", "grams": 30, "price": 49},
+        {"id": 6, "name": "Корнишоны", "kolichestvo": 1.5, "price": 49},
+        {"id": 7, "name": "Помидоры", "grams": 50, "price": 69},
+        {"id": 8, "name": "Бекон", "grams": 50, "price": 80},
+        {"id": 9, "name": "Колбаски", "kolichestvo": 1.5, "price": 80}
+     ]
+}
