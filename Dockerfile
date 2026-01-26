@@ -15,4 +15,4 @@ COPY . .
 VOLUME /app/data
 
 # Запускаем приложение
-CMD ["python", "bot.py"]
+CMD ["python", "main.py"]
