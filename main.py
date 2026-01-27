@@ -45,6 +45,7 @@ os.makedirs('/data', exist_ok=True)
 conn = sqlite3.connect(DB_PATH, check_same_thread=False)
 cursor = conn.cursor()
 
+
 cursor.execute('PRAGMA journal_mode=WAL;')
 cursor.execute('PRAGMA synchronous=NORMAL;')
 
@@ -64,8 +65,8 @@ CREATE TABLE IF NOT EXISTS orders (
     order_text TEXT,
     order_status TEXT,
     created_at TEXT,
-    is_archived INTEGER DEFAULT 0
-    is_sent_to_group INTEGER DEFAULT
+    is_archived INTEGER DEFAULT 0,
+    is_sent_to_group INTEGER DEFAULT 0  -- Добавляем запятую перед этим полем
 )
 ''')
 
@@ -612,7 +613,6 @@ def operator_status_keyboard(order_id):
             )
         )
     return kb
-
 
 # ================= ВСПОМОГАТЕЛЬНОЕ =================
 def send_item_with_image(chat_id, image_url, text, kb=None):
