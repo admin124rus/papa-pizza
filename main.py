@@ -1001,8 +1001,6 @@ def main_menu(chat_id):
             types.InlineKeyboardButton('📜 История заказов', callback_data='order_history')
         )
 
-
-
     # 🔥 ВОТ ЭТОГО НЕ ХВАТАЛО
     bot.send_message(
         chat_id,
@@ -1346,21 +1344,31 @@ def shaurma_menu(chat_id):
         parse_mode='HTML',
         reply_markup=kb
     )
-
-
 def shaurma_details(chat_id, sh):
-    text = f'<b>{sh["name"]}</b>\n💰 Цена: {sh["price"]} ₽'
+    text = (
+        f'<b>{sh["name"]}</b>\n'
+        f'💰 Цена: {sh["price"]} ₽'
+    )
+
+    if sh.get('description'):
+        text += f'\n\n🧾 <b>Состав:</b>\n{sh["description"]}'
 
     kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton(
-        '➕ В корзину',
-        callback_data=f'add_to_cart_shaurma_{sh["id"]}'
-    ))
+    kb.add(
+        types.InlineKeyboardButton(
+            '➕ В корзину',
+            callback_data=f'add_to_cart_shaurma_{sh["id"]}'
+        )
+    )
 
     add_card_navigation(kb, 'menu_shaurma')
 
-    bot.send_message(chat_id, text, parse_mode='HTML', reply_markup=kb)
-
+    send_item_with_image(
+        chat_id,
+        sh.get('image'),  # ← КАРТИНКА КАК У ПИЦЦ
+        text,
+        kb
+    )
 
 # ================= ОФОРМЛЕНИЕ =================
 def start_order(chat_id):
@@ -1451,7 +1459,6 @@ def get_delivery_zone(message):
         reply_markup=kb
     )
 
-
 def get_address(message):
     chat_id = message.chat.id
     user_order_data[chat_id]['address'] = message.text
@@ -1465,7 +1472,6 @@ def get_delivery_time(message):
     user_order_data[chat_id]['delivery_time'] = message.text
 
     ask_payment(chat_id)
-
 
 def ask_payment(chat_id):
     kb = types.InlineKeyboardMarkup(row_width=1)
@@ -1483,7 +1489,6 @@ def ask_payment(chat_id):
         reply_markup=kb
     )
 
-
 def ask_cash_change(chat_id):
     msg = bot.send_message(
         chat_id,
@@ -1493,12 +1498,10 @@ def ask_cash_change(chat_id):
     )
     bot.register_next_step_handler(msg, get_cash_change)
 
-
 def get_cash_change(message):
     chat_id = message.chat.id
     user_order_data[chat_id]['cash_change'] = message.text
     ask_comment(chat_id)
-
 
 def ask_comment(chat_id):
     msg = bot.send_message(
@@ -1506,7 +1509,6 @@ def ask_comment(chat_id):
         '📝 Комментарий к заказу (если нет — напишите «нет»):'
     )
     bot.register_next_step_handler(msg, get_comment)
-
 
 def get_comment(message):
     chat_id = message.chat.id
@@ -1517,7 +1519,6 @@ def get_comment(message):
 
     user_order_data[chat_id]['comment'] = text
     finish_order(chat_id)
-
 
 def finish_order(chat_id):
     order_id = save_order(chat_id)
@@ -1541,7 +1542,6 @@ def finish_order(chat_id):
     # очищаем корзину и данные заказа
     user_carts[chat_id] = []
     user_order_data.pop(chat_id, None)
-
 
 
 def notify_admin_new_order(order_id):
@@ -1742,14 +1742,12 @@ def callbacks(c):
         sid = int(d.split('_')[2])
         snack = next(x for x in zakuski_menu if x["id"] == sid)
         snack_details(chat_id, snack)
-    elif d.startswith('drink_cat_'):
-        key = d.replace('drink_cat_', '')
-        drink_category_menu(chat_id, key)
-
     elif d.startswith('shaurma_info_'):
         sid = int(d.split('_')[2])
-        sh = next(x for x in shaurma_list if x["id"] == sid)
-        shaurma_details(chat_id, sh)
+        sh = next((x for x in shaurma_list if x['id'] == sid), None)
+        if sh:
+            shaurma_details(chat_id, sh)
+
 
     # ===== СПЕЦИАЛЬНЫЕ МЕНЮ =====
     elif d == 'snack_striptsy':
