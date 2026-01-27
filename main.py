@@ -11,6 +11,7 @@ from datetime import datetime
 
 # ================= ВЛАДЕЛЕЦ =================
 OWNER_ID = 7862970987
+ARCHIVE_GROUP_ID = -1003702155877
 # ================= НАСТРОЙКИ =================
 tz = pytz.timezone('Asia/Krasnoyarsk')
 bot = telebot.TeleBot(config.TOKEN)
@@ -1525,10 +1526,7 @@ def finish_order(chat_id):
 
     kb = types.InlineKeyboardMarkup()
     kb.add(
-        types.InlineKeyboardButton(
-            '🏠 Главное меню',
-            callback_data='back_main'
-        )
+        types.InlineKeyboardButton('🏠 Главное меню', callback_data='back_main')
     )
 
     bot.send_message(
@@ -1539,10 +1537,12 @@ def finish_order(chat_id):
         reply_markup=kb
     )
 
-    # очищаем корзину и данные заказа
+    # Очищаем корзину и данные заказа
     user_carts[chat_id] = []
     user_order_data.pop(chat_id, None)
 
+    # Отправляем заказ в архивную группу
+    send_order_to_archive_group(order_id)
 
 def notify_admin_new_order(order_id):
     for admin_id in get_all_admins():
@@ -1558,6 +1558,25 @@ def notify_admin_new_order(order_id):
             )
         except Exception as e:
             print(f"Ошибка отправки уведомления администратору {admin_id}: {e}")
+
+def send_order_to_archive_group(order_id):
+    text = build_admin_order_text(order_id)
+
+    kb = types.InlineKeyboardMarkup()
+    kb.add(
+        types.InlineKeyboardButton(
+            '📦 Заказ заархивирован',
+            callback_data='archive_stub'
+        )
+    )
+
+    bot.send_message(
+        ARCHIVE_GROUP_ID,
+        text,
+        parse_mode='HTML',
+        reply_markup=kb,
+        disable_web_page_preview=True
+    )
 
 def save_order(chat_id):
     data = user_order_data[chat_id]
@@ -1992,11 +2011,6 @@ def callbacks(c):
 
         current_status, is_archived, user_id = row
 
-        # 🚫 Запрет изменения архивного заказа
-        if is_archived:
-            bot.answer_callback_query(c.id, '📦 Заказ в архиве. Изменение запрещено')
-            return
-
         # 🔄 Новый статус
         new_status = ORDER_STATUSES[status_key]
 
@@ -2028,6 +2042,8 @@ def callbacks(c):
         if new_is_archived:
             # ушёл в архив → показываем архив
             show_archive_orders_admin(chat_id)
+            # Отправляем заказ в архивную группу
+            send_order_to_archive_group(order_id)
         else:
             # остаётся активным → обновляем карточку
             text = build_admin_order_text(order_id)
@@ -2040,8 +2056,6 @@ def callbacks(c):
             )
 
         bot.answer_callback_query(c.id, f'Статус: {new_status}')
-
-
 
     # ===== ОПЛАТА =====
     elif d.startswith('pay_'):
