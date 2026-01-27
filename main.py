@@ -1544,9 +1544,6 @@ def finish_order(chat_id):
     user_carts[chat_id] = []
     user_order_data.pop(chat_id, None)
 
-    # Отправляем заказ в архивную группу
-    send_order_to_archive_group(order_id)
-
 def notify_admin_new_order(order_id):
     for admin_id in get_all_admins():
         try:
