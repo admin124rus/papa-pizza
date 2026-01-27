@@ -10,7 +10,7 @@ from datetime import datetime
 
 
 # ================= ВЛАДЕЛЕЦ =================
-OWNER_ID = 7862970987
+OWNER_ID = 6635821466
 ARCHIVE_GROUP_ID = -1003702155877
 # ================= НАСТРОЙКИ =================
 tz = pytz.timezone('Asia/Krasnoyarsk')
