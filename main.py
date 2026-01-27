@@ -593,10 +593,12 @@ def show_order_detail_admin(chat_id, order_id):
     )
 
 def operator_status_keyboard(order_id):
-    """Клавиатура изменения статуса заказа для оператора"""
-    cursor.execute('SELECT order_status FROM orders WHERE id = ?', (order_id,))
+    cursor.execute('SELECT order_status, is_archived, user_id, is_sent_to_group FROM orders WHERE id = ?', (order_id,))
     row = cursor.fetchone()
-    current_status = row[0] if row else ''
+    if not row:
+        return None
+
+    current_status, is_archived, user_id, is_sent_to_group = row
 
     kb = types.InlineKeyboardMarkup(row_width=2)
     for key, text in ORDER_STATUSES.items():
@@ -1560,6 +1562,11 @@ def notify_admin_new_order(order_id):
             print(f"Ошибка отправки уведомления администратору {admin_id}: {e}")
 
 def send_order_to_archive_group(order_id):
+    cursor.execute('SELECT is_sent_to_group FROM orders WHERE id = ?', (order_id,))
+    row = cursor.fetchone()
+    if row and row[0] == 1:
+        return  # Заказ уже был отправлен в группу
+
     text = build_admin_order_text(order_id)
 
     kb = types.InlineKeyboardMarkup()
@@ -1577,6 +1584,10 @@ def send_order_to_archive_group(order_id):
         reply_markup=kb,
         disable_web_page_preview=True
     )
+
+    # Обновляем флаг отправки в группу
+    cursor.execute('UPDATE orders SET is_sent_to_group = 1 WHERE id = ?', (order_id,))
+    conn.commit()
 
 def save_order(chat_id):
     data = user_order_data[chat_id]
@@ -1984,40 +1995,25 @@ def callbacks(c):
 
     # ===== СТАТУСЫ ЗАКАЗОВ (ОПЕРАТОР) =====
     elif d.startswith('status_'):
-        # status_<order_id>_<status_key>
         _, order_id_str, status_key = d.split('_')
         order_id = int(order_id_str)
 
-        # 🔐 Проверка прав
-        if not is_admin(chat_id):
-            bot.answer_callback_query(c.id, '❌ Нет доступа')
-            return
-
-        # 🔍 Проверка статуса
         if status_key not in ORDER_STATUSES:
             bot.answer_callback_query(c.id, '❌ Некорректный статус')
             return
 
-        # 📦 Получаем заказ
-        cursor.execute(
-            'SELECT order_status, is_archived, user_id FROM orders WHERE id = ?',
-            (order_id,)
-        )
+        cursor.execute('SELECT order_status, is_archived, user_id, is_sent_to_group FROM orders WHERE id = ?',
+                       (order_id,))
         row = cursor.fetchone()
-
         if not row:
             bot.answer_callback_query(c.id, '❌ Заказ не найден')
             return
 
-        current_status, is_archived, user_id = row
+        current_status, is_archived, user_id, is_sent_to_group = row
 
-        # 🔄 Новый статус
         new_status = ORDER_STATUSES[status_key]
-
-        # 📦 Архивируем только финальные статусы
         new_is_archived = 1 if status_key in ('done', 'canceled') else 0
 
-        # 💾 Обновление БД
         cursor.execute(
             '''
             UPDATE orders
@@ -2028,7 +2024,9 @@ def callbacks(c):
         )
         conn.commit()
 
-        # 📢 Уведомляем клиента
+        if new_status == ORDER_STATUSES['done'] and not is_sent_to_group:
+            send_order_to_archive_group(order_id)
+
         if user_id:
             try:
                 bot.send_message(
@@ -2038,14 +2036,9 @@ def callbacks(c):
             except:
                 pass
 
-        # 🔁 Обновляем интерфейс администратора
         if new_is_archived:
-            # ушёл в архив → показываем архив
             show_archive_orders_admin(chat_id)
-            # Отправляем заказ в архивную группу
-            send_order_to_archive_group(order_id)
         else:
-            # остаётся активным → обновляем карточку
             text = build_admin_order_text(order_id)
             bot.edit_message_text(
                 chat_id=chat_id,
