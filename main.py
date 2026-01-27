@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS orders (
     order_status TEXT,
     created_at TEXT,
     is_archived INTEGER DEFAULT 0
+    is_sent_to_group INTEGER DEFAULT
 )
 ''')
 
