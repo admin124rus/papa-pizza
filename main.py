@@ -772,7 +772,6 @@ def build_item_card(item_type, item):
         diameter = f'{item["diameter"]} см' if item.get("diameter") else '—'
         grams = f'{item["grams"]} г' if item.get("grams") and item["grams"] != "null" else '—'
         text += f'\n📏 Диаметр: {diameter}'
-        text += f'\n⚖️ Вес: {grams}'
         text += f'\n🧾 Состав: {item["ingredients"]}'
 
     elif item_type == 'combo':
@@ -893,12 +892,15 @@ def add_card_navigation(kb: types.InlineKeyboardMarkup, back_callback: str):
 # ================= КОРЗИНА =================
 def add_to_cart(chat_id, item_type, item, call_id=None):
     card_text = build_item_card(item_type, item)
-
     user_carts.setdefault(chat_id, [])
 
-    # Проверяем, есть ли уже такой товар в корзине (по id и типу)
+    # Определяем уникальный ключ для позиции
+    item_key = f'{item["id"]}_{item.get("diameter", 0)}'
+
+    # Проверяем, есть ли уже такой товар в корзине
     for cart_item in user_carts[chat_id]:
-        if cart_item['type'] == item_type and cart_item['item']['id'] == item['id']:
+        existing_key = f'{cart_item["item"]["id"]}_{cart_item["item"].get("diameter", 0)}'
+        if cart_item['type'] == item_type and existing_key == item_key:
             cart_item['quantity'] += 1
             if call_id:
                 bot.answer_callback_query(call_id, f'✅ Количество {item["name"]} увеличено')
@@ -913,7 +915,7 @@ def add_to_cart(chat_id, item_type, item, call_id=None):
     })
 
     if call_id:
-        bot.answer_callback_query(call_id, f'✅ {item["name"]} добавлено в корзину')
+        bot.answer_callback_query(call_id, f'✅ {item["name"]} ({item.get("diameter", "—")} см) добавлено в корзину')
 
 
 def show_cart(chat_id):
@@ -1005,7 +1007,6 @@ def main_menu(chat_id):
             types.InlineKeyboardButton('📜 История заказов', callback_data='order_history')
         )
 
-    # 🔥 ВОТ ЭТОГО НЕ ХВАТАЛО
     bot.send_message(
         chat_id,
         '🏠 <b>Главное меню</b>',
@@ -1086,28 +1087,35 @@ def pizza_combo_menu(chat_id):
 def pizza_details(chat_id, pid):
     p = next(x for x in pizzas if x['id'] == pid)
 
-    diameter = f'{p["diameter"]} см' if p.get("diameter") else '—'
-    grams = f'{p["grams"]} г' if p.get("grams") and p.get("grams") != "null" else '—'
-
-    text = (
-        f'<b>{p["name"]}</b>\n'
-        f'💰 Цена: {p["price"]} ₽\n'
-        f'📏 Диаметр: {diameter}\n'
-        f'⚖️ Вес: {grams}\n\n'
-        f'🧾 <b>Состав:</b>\n{p["ingredients"]}'
-    )
-
     kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton(
-        '➕ В корзину',
-        callback_data=f'add_to_cart_pizza_{pid}'
-    ))
+
+    # Проверяем, есть ли несколько размеров
+    if "sizes" in p and p["sizes"]:
+        for s in p["sizes"]:
+            kb.add(types.InlineKeyboardButton(
+                f'{s["diameter"]} см — {s["price"]} ₽',
+                callback_data=f'add_to_cart_pizza_{pid}_{s["diameter"]}'
+            ))
+    else:
+        # Если размер один (у старых пицц без поля sizes)
+        kb.add(types.InlineKeyboardButton(
+            f'{p.get("diameter", "—")} см — {p.get("price", "—")} ₽',
+            callback_data=f'add_to_cart_pizza_{pid}_{p.get("diameter", 0)}'
+        ))
 
     add_card_navigation(kb, 'pizza_single')
 
+    text = (
+        f'<b>{p["name"]}</b>\n\n'
+        f'🧾 <b>Состав:</b>\n{p.get("ingredients", "—")}'
+    )
+
+    import time
+    image_url = f'{p.get("image")}?v={int(time.time())}'
+
     send_item_with_image(
         chat_id,
-        p.get('image'),  # Полный URL изображения из JSON
+        image_url,
         text,
         kb
     )
@@ -1367,9 +1375,12 @@ def shaurma_details(chat_id, sh):
 
     add_card_navigation(kb, 'menu_shaurma')
 
+    import time
+    image_url = f'{sh.get("image")}?v={int(time.time())}'
+
     send_item_with_image(
         chat_id,
-        sh.get('image'),  # ← КАРТИНКА КАК У ПИЦЦ
+        image_url,
         text,
         kb
     )
@@ -2064,6 +2075,38 @@ def callbacks(c):
             ask_comment(chat_id)
 
     # ===== ДОСТАВКА/САМОЗАБОР ЗАВЕРШЕНИЕ =====
+    # ===== ДОБАВЛЕНИЕ В КОРЗИНУ ПИЦЦЫ С ВЫБОРОМ РАЗМЕРА =====
+    elif d.startswith('add_to_cart_pizza_'):
+        parts = d.replace('add_to_cart_pizza_', '').split('_')
+
+        pid = int(parts[0])
+        diameter = int(parts[1]) if len(parts) > 1 else None
+
+        pizza = next(x for x in pizzas if x['id'] == pid)
+
+        # ----- ПИЦЦЫ С НЕСКОЛЬКИМИ РАЗМЕРАМИ -----
+        if 'sizes' in pizza:
+            size_data = next(
+                (s for s in pizza['sizes'] if s['diameter'] == diameter),
+                None
+            )
+
+            if size_data:
+                item = pizza.copy()
+                item['diameter'] = size_data['diameter']
+                item['price'] = size_data['price']
+
+                item.pop('grams', None)
+
+                add_to_cart(chat_id, 'pizza', item, c.id)
+                return
+
+        # ----- ПИЦЦЫ С ОДНИМ РАЗМЕРОМ -----
+        item = pizza.copy()
+        item.pop('grams', None)
+
+        add_to_cart(chat_id, 'pizza', item, c.id)
+
     elif d.startswith('add_to_cart_'):
         t, i = d.replace('add_to_cart_', '').split('_')
         sources = {
