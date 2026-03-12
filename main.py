@@ -615,8 +615,13 @@ def operator_status_keyboard(order_id):
     return kb
 
 # ================= ВСПОМОГАТЕЛЬНОЕ =================
-def send_item_with_image(chat_id, image_url, text, kb=None):
-    if image_url:
+def send_item_with_image(chat_id, image_url, text, kb):
+    import time
+
+    # Проверяем что ссылка действительно существует и это URL
+    if image_url and image_url.startswith("http"):
+        image_url = f"{image_url}?v={int(time.time())}"
+
         bot.send_photo(
             chat_id,
             photo=image_url,
@@ -625,6 +630,7 @@ def send_item_with_image(chat_id, image_url, text, kb=None):
             reply_markup=kb
         )
     else:
+        # если картинки нет или ссылка неправильная
         bot.send_message(
             chat_id,
             text,

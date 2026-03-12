@@ -199,16 +199,17 @@
             "ingredients": "null",
             "image": "https://raw.githubusercontent.com/admin124rus/papa-pizza/main/images/Трехэтажная.jpg"
         },
-      {
+        {
+
             "id": 21,
-            "name": "Маленькие пиццы в ассортиминте",
+            "name": "Маленькие пиццы в ассортименте",
             "price": 370,
             "diameter": 24,
             "ingredients": "null",
-            "image": ""
+            "image": null
+
         },
-      {
-            "id": 22,
+        {   "id": 22,
             "name": "Мясной пир",
             "price": 799,
             "diameter": 33,
